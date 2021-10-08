@@ -11,7 +11,7 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: self-hosted
+    runs-on: [self-hosted, connect_to_jenkins_dispatcher]
 
     steps:
       - name: Create Checkout Directory
@@ -24,9 +24,9 @@ jobs:
         with:
           path: ${{ github.run_id }}
 
-      - name: Build
+      - name: CopyCodeToServers
         run: |
-          cd ../../ && ./build_pplnn.sh ${{ github.run_id }} others
+          cd ../../ && ./copy_pplnn_to_servers.sh ${{ github.run_id }}
       - name: Test
         run: |
-          cd ../../ && ./test_pplnn.sh ${{ github.run_id }} others
+          cd ../../ && ./test_pplnn_on_servers.sh ${{ github.run_id }}
