@@ -1,4 +1,4 @@
-name: PPL<MIPS> Build && Quick Test
+name: PPL<Others> Build && Quick Test
 
 on:
   #push:
@@ -26,7 +26,7 @@ jobs:
 
       - name: Build
         run: |
-          cd ../../ && ./build_pplnn.sh ${{ github.run_id }} mips
+          cd ../../ && ./build_pplnn.sh ${{ github.run_id }} others
       - name: Test
         run: |
-          cd ../../ && ./test_pplnn.sh ${{ github.run_id }} mips
+          cd ../../ && ./test_pplnn.sh ${{ github.run_id }} others
