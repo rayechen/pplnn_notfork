@@ -24,9 +24,9 @@ jobs:
         with:
           path: ${{ github.run_id }}
 
-      - name: CopyCodeToServers
-        run: |
-          cd ../../ && ./copy_pplnn_to_servers.sh ${{ github.run_id }}
+      #- name: CopyCodeToServers
+      #  run: |
+      #    cd ../../ && ./copy_pplnn_to_servers.sh ${{ github.run_id }}
       - name: Test
         run: |
           cd ../../ && ./test_pplnn_on_servers.sh ${{ github.run_id }}
