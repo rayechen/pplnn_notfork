@@ -30,6 +30,11 @@ jobs:
       - name: Test
         run: |
           cd ../../ && ./test_pplnn_on_servers.sh ${{ github.run_id }}
+      
+      - name: ifcancelled
+        if: ${{ cancelled() }}
+        run: |
+          echo "workflow is cancelled."
           
       - name: clean
         if: ${{ always() }}
