@@ -30,3 +30,8 @@ jobs:
       - name: Test
         run: |
           cd ../../ && ./test_pplnn_on_servers.sh ${{ github.run_id }}
+          
+      - name: clean
+        if: ${{ always() }}
+        run: |
+          echo "clean up."
