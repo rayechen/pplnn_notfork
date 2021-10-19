@@ -30,7 +30,7 @@ jobs:
       - name: Test
         run: |
           jenkins_runid="100"
-          echo "jenkin runid: ${{ jenkins_runid }}"
+          echo "jenkin runid: $jenkins_runid"
           cd ../../ && ./test_pplnn_on_servers.sh ${{ github.run_id }}
       
       - name: ifcancelled
