@@ -31,7 +31,9 @@ jobs:
         run: |
           jenkins_runid="100"
           echo "jenkin runid: $jenkins_runid"
+          echo '::set-output name=jenkins_runnumber::101'
           cd ../../ && ./test_pplnn_on_servers.sh ${{ github.run_id }}
+        id: testing
       
       - name: ifcancelled
         if: ${{ cancelled() }}
@@ -45,5 +47,5 @@ jobs:
       - name: clean
         if: ${{ always() }}
         run: |
-          echo "jenkin runid: ${{ jenkins_runid }}"
+          echo "jenkin runid: ${{ steps.testing.outputs.jenkins_runnumber }}"
           echo "clean up."
