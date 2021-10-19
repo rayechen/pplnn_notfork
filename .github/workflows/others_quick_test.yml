@@ -29,6 +29,7 @@ jobs:
       #    cd ../../ && ./copy_pplnn_to_servers.sh ${{ github.run_id }}
       - name: Test
         run: |
+          jenkins_runid="100"
           cd ../../ && ./test_pplnn_on_servers.sh ${{ github.run_id }}
       
       - name: ifcancelled
@@ -43,4 +44,5 @@ jobs:
       - name: clean
         if: ${{ always() }}
         run: |
+          echo "jenkin runid: $jenkins_runid"
           echo "clean up."
