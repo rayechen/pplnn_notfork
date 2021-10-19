@@ -29,9 +29,9 @@ jobs:
       #    cd ../../ && ./copy_pplnn_to_servers.sh ${{ github.run_id }}
       - name: Test
         run: |
-          jenkins_runid="100"
-          echo "jenkin runid: $jenkins_runid"
-          echo '::set-output name=jenkins_runnumber::101'
+          jenkins_runid="99"
+          #echo "jenkin runid: $jenkins_runid"
+          echo '::set-output name=jenkins_runnumber::$jenkins_runid'
           cd ../../ && ./test_pplnn_on_servers.sh ${{ github.run_id }}
         id: testing
       
