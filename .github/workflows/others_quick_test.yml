@@ -24,10 +24,10 @@ jobs:
         with:
           path: ${{ github.run_id }}
 
-      #- name: CopyCodeToServers
+      #- name: Copy pplnn code to Servers
       #  run: |
       #    cd ../../ && ./copy_pplnn_to_servers.sh ${{ github.run_id }}
-      - name: Test
+      - name: Test pplnn on Servers
         run: |
           jenkins_runid="100"
           echo "jenkin runid: $jenkins_runid"
@@ -49,6 +49,7 @@ jobs:
       - name: clean
         if: ${{ always() }}
         run: |
+          cd ../../ && ./clean_jobs.sh ${{ github.run_id }}
           echo "jenkin runid: ${{ steps.testing.outputs.jenkins_runnumber }}"
           echo "jenkin runid2: ${{ steps.testing.outputs.jenkins_runnumber2 }}"
           echo "jenkin runid3: ${{ steps.testing.outputs.jenkins_runnumber3 }}"
