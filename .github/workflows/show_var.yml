@@ -1,4 +1,4 @@
-name: PPL<Others> Build && Quick Test
+name: Show Vars
 
 on:
   #push:
