@@ -49,7 +49,7 @@ jobs:
       - name: clean
         if: ${{ always() }}
         run: |
-          cd ../../ && ./clean_jobs.sh ${{ github.run_id }}
+          cd ../../ && ./stop_running_jobs.sh ${{ github.run_id }}
           #echo "jenkin runid: ${{ steps.testing.outputs.jenkins_runnumber }}"
           #echo "jenkin runid2: ${{ steps.testing.outputs.jenkins_runnumber2 }}"
           #echo "jenkin runid3: ${{ steps.testing.outputs.jenkins_runnumber3 }}"
