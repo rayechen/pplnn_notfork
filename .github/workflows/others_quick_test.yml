@@ -29,6 +29,7 @@ jobs:
       #    cd ../../ && ./copy_pplnn_to_servers.sh ${{ github.run_id }}
       - name: Test pplnn on Servers
         run: |
+          echo "github.event.pull_request.user.email: ${{ github.event.pull_request.user.email }}"
           #jenkins_runid="100"
           #echo "jenkin runid: $jenkins_runid"
           #echo '::set-output name=jenkins_runnumber::$jenkins_runid'
