@@ -17,5 +17,6 @@ jobs:
       - name: show vars
         run: |
           echo "github.event_name: ${{ github.event_name }}"
+          echo "github.event.workflow_dispatch.user.login: ${{ github.event.workflow_dispatch.user.login }}"
           echo "github.event.pull_request.user.login: ${{ github.event.pull_request.user.login }}"
           echo "github.event.pull_request.author.email: ${{ github.event.pull_request.author.email }}"
