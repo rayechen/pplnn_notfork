@@ -23,6 +23,8 @@
 #include "ppl/common/types.h"
 #include "ppl/nn/engines/engine_impl.h"
 #include "ppl/nn/engines/cuda/cuda_engine_options.h"
+#include "ppl/nn/engines/cuda/cuda_options.h"
+#include "ppl/nn/engines/cuda/cuda_common_param.h"
 #include "ppl/nn/engines/cuda/buffered_cuda_device.h"
 #include "ppl/nn/quantization/quant_param_parser.h"
 
@@ -36,10 +38,20 @@ struct CudaArgs {
         input_dims.emplace("", default_dims);
     }
 
+    struct AlgoInfo {
+        int kid = 0;
+        int splitk = 1;
+        int splitf = 1;
+    };
+
     bool quick_select = false;
+    ppl::common::datatype_t kernel_default_type = 0;
     std::map<std::string, ppl::common::dataformat_t> output_formats;
     std::map<std::string, ppl::common::datatype_t> output_types;
+    std::map<std::string, ppl::common::datatype_t> node_types;
     std::map<std::string, std::vector<uint32_t>> input_dims;
+    std::map<std::string, std::vector<CudaTensorQuant>> tensor_quants;
+    std::map<std::string, AlgoInfo> alog_selects;
     QuantParamInfo quant_info;
 };
 
@@ -49,7 +61,7 @@ public:
     ppl::common::RetCode Init(const CudaEngineOptions& options);
     ppl::common::RetCode Configure(uint32_t, ...) override;
     EngineContext* CreateEngineContext(const std::string& graph_name) override;
-    bool CanRunOp(const ir::Node*) const override;
+    bool Supports(const ir::Node*) const override;
     ppl::common::RetCode ProcessGraph(utils::SharedResource*, ir::Graph*, RuntimePartitionInfo*) override;
 
 private:
@@ -65,6 +77,7 @@ private:
     static ppl::common::RetCode SetCompilerInputDims(CudaEngine*, va_list);
     static ppl::common::RetCode SetUseDefaultAlgorithms(CudaEngine*, va_list);
     static ppl::common::RetCode SetQuantization(CudaEngine*, va_list);
+    static ppl::common::RetCode SetAlgorithm(CudaEngine*, va_list);
 
     typedef ppl::common::RetCode (*ConfHandlerFunc)(CudaEngine*, va_list);
     static ConfHandlerFunc conf_handlers_[CUDA_CONF_MAX];

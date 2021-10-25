@@ -20,6 +20,8 @@
 
 #include "ppl/nn/engines/cuda/optimizer/opt_kernel.h"
 
+#include "ppl/nn/engines/cuda/params/clip_extra_param.h"
+
 namespace ppl { namespace nn { namespace cuda {
 
 class ClipOp final : public CudaOptKernel {
@@ -28,6 +30,9 @@ public:
     KernelImpl* CreateKernelImpl() const override;
     ppl::common::RetCode Init(const OptKernelOptions&) override;
     ppl::common::RetCode Finalize(const OptKernelOptions& options) override;
+
+private:
+    ClipParam param_;
 };
 
 }}} // namespace ppl::nn::cuda

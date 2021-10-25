@@ -29,29 +29,29 @@ public:
     ConcatAlgorithm() {
         std::set<dataformat_t> ndarray{DATAFORMAT_NDARRAY};
         concat_formats_.emplace(DATAFORMAT_NDARRAY, ndarray);
-        std::set<dataformat_t> nhwc{DATAFORMAT_NHWC};
-        concat_formats_.emplace(DATAFORMAT_NHWC, nhwc);
+        std::set<dataformat_t> nhwc8{DATAFORMAT_NHWC8};
+        concat_formats_.emplace(DATAFORMAT_NHWC8, nhwc8);
     }
 
-    void GetAttrParam(void*& param) override {
+    void GetAttrParam(void*& param) const override {
         return;
     };
     void DeleteAttrParam(void*& param) override {
         return;
     };
 
-    const std::map<dataformat_t, std::set<dataformat_t>> Getformats(const std::string& type_name) override {
+    const std::map<dataformat_t, std::set<dataformat_t>> Getformats(const std::string& type_name) const override {
         return concat_formats_;
     }
 
-    const double ExcuteTimer(ir::Node* node, OptKernelOptions& options) override;
+    double ExcuteTimer(const ir::Node* node, OptKernelOptions& options) override;
 
     RetCode ModifyParam(const ir::Node*, OptKernelOptions& options) override {
         return RC_SUCCESS;
     }
 
     void ReshapeOnEdges(const ir::Node* node, std::map<edgeid_t, std::unique_ptr<TensorImpl>>* tensors,
-                        dataformat_t input_format, dataformat_t output_format) override;
+                                ppl::common::dataformat_t input_format, ppl::common::dataformat_t output_format) override;
 
 private:
     std::map<dataformat_t, std::set<dataformat_t>> concat_formats_;

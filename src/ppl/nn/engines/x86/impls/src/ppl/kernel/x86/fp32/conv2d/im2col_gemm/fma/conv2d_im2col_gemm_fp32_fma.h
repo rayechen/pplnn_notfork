@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef __ST_PPL_KERNEL_X86_FP32_CONV2D_GEMM_DIRECT_FMA_CONV2D_IM2COL_GEMM_FP32_FMA_H_
-#define __ST_PPL_KERNEL_X86_FP32_CONV2D_GEMM_DIRECT_FMA_CONV2D_IM2COL_GEMM_FP32_FMA_H_
+#ifndef __ST_PPL_KERNEL_X86_FP32_CONV2D_IM2COL_GEMM_FMA_CONV2D_IM2COL_GEMM_FP32_FMA_H_
+#define __ST_PPL_KERNEL_X86_FP32_CONV2D_IM2COL_GEMM_FMA_CONV2D_IM2COL_GEMM_FP32_FMA_H_
 
 #include "ppl/kernel/x86/fp32/conv2d.h"
 #include "ppl/kernel/x86/common/internal_include.h"
@@ -39,22 +39,20 @@ public:
 private:
     struct kernel_schedule_param {
         // Preprocessed param
-        int32_t ic_per_gp;
-        int32_t oc_per_gp;
-        int32_t k_per_gp;
+        int64_t ic_per_gp;
+        int64_t oc_per_gp;
+        int64_t k_per_gp;
         int64_t padded_k;
 
         // Kernel tunning
-        int32_t hw_l2_blk;
-        int32_t mb_l3_blk;
-        int32_t gp_l3_blk;
+        int64_t hw_l2_blk;
+        int64_t mb_l3_blk;
+        int64_t gp_l3_blk;
         int32_t use_nt_store;
     } schedule_param_;
 
     void init_preproc_param();
     void cal_kernel_tunning_param();
-
-    static int32_t cal_ic_l2_blk(const conv2d_fp32_param &param);
 
     friend conv2d_im2col_gemm_fp32_fma_manager;
 };

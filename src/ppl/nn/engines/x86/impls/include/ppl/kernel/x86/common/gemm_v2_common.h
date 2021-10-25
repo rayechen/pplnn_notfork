@@ -51,17 +51,17 @@ struct gemm_v2_param_fp32 {
     float* dst_Y       = nullptr;
     int32_t trans_A    = 0;
     int32_t trans_B    = 0;
-    int32_t M          = 0;
-    int32_t N          = 0;
-    int32_t K          = 0;
-    int32_t lda        = 0;
-    int32_t ldb        = 0;
-    int32_t ldc        = 0;
-    int32_t ldy        = 0;
+    int64_t M          = 0;
+    int64_t N          = 0;
+    int64_t K          = 0;
+    int64_t lda        = 0;
+    int64_t ldb        = 0;
+    int64_t ldc        = 0;
+    int64_t ldy        = 0;
     float alpha        = 1.0f;
     float beta         = 0.0f;
 
-    ppl::common::isa_t isa_flag   = ppl::common::ISA_undef;
+    ppl::common::isa_t isa_flag   = ppl::common::ISA_UNKNOWN;
     gemm_v2_fuse_flag_t fuse_flag = gemm_v2_fuse_flag::none;
     gemm_v2_C_type_t c_type       = gemm_v2_C_type::empty;
 };

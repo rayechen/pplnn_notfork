@@ -26,10 +26,17 @@ using namespace ppl::common;
 namespace ppl { namespace nn { namespace cuda {
 
 RetCode FloorOp::Init(const OptKernelOptions& options) {
-    infer_type_func_ = [this](InputOutputInfo* info, datatype_t type) -> RetCode {
-        auto shape = &info->GetOutput<TensorImpl>(0)->GetShape();
-        shape->SetDataType(DATATYPE_FLOAT32);
-        return RC_SUCCESS;
+    infer_type_func_ = [this](InputOutputInfo* info, std::vector<CudaTensorQuant>* quant, datatype_t type) -> RetCode {
+        type = DATATYPE_FLOAT32;
+        ppl::common::RetCode status;
+        if (type == DATATYPE_UNKNOWN) {
+            status = InferInheritedType(info);
+        } else if (type == DATATYPE_INT8) {
+            status = CopyQuantType(info, quant);
+        } else {
+            status = InferDefaultType(info, type);
+        }
+        return status;
     };
 
     infer_dims_func_ = [this](InputOutputInfo* info) -> RetCode {

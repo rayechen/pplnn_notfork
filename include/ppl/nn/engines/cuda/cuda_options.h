@@ -62,6 +62,26 @@ enum {
     */
     CUDA_CONF_USE_DEFAULT_ALGORITHMS,
 
+    /**
+       @brief the name of json file that saves quantization information
+
+       @note example:
+       @code{.cpp}
+       cuda_engine->Configure(CUDA_CONF_SET_QUANTIZATION, "quantization.json");
+       @endcode
+    */
+    CUDA_CONF_SET_QUANTIZATION,
+   
+    /**
+       @brief the name of json file that saves selected algos' index information
+
+       @note example:
+       @code{.cpp}
+       cuda_engine->Configure(CUDA_CONF_SET_ALGORITHM, "algo_info.json");
+       @endcode
+    */
+    CUDA_CONF_SET_ALGORITHM,
+    
     /** max value */
     CUDA_CONF_MAX,
 };

@@ -11,15 +11,16 @@ Engine* X86EngineFactory::Create();
 to create an engine which runs on x86-compatible CPUs:
 
 ```c++
-Engine* x86_engine = X86EngineFactory::Create();
+X86EngineOptions x86_options;
+Engine* x86_engine = X86EngineFactory::Create(x86_options);
 ```
 
 Or use
 
 ```c++
-CudaEngineOptions options;
+CudaEngineOptions cuda_options;
 // ... set options
-Engine* CudaEngineFactory::Create(options);
+Engine* CudaEngineFactory::Create(cuda_options);
 ```
 
 to create an engine running on NVIDIA GPUs.
@@ -29,8 +30,8 @@ to create an engine running on NVIDIA GPUs.
 We create a `RuntimeBuilder` with the following function:
 
 ```c++
-OnnxRuntimeBuilder* OnnxRuntimeBuilderFactory::Create(
-    const char* model_file, std::vector<std::unique_ptr<Engine>>&& engines);
+RuntimeBuilder* OnnxRuntimeBuilderFactory::Create(
+    const char* model_file, Engine** engines, uint32_t engine_num);
 ```
 
 where the second parameter `engines` is the `x86_engine` we created:
@@ -38,10 +39,6 @@ where the second parameter `engines` is the `x86_engine` we created:
 ```c++
 vector<unique_ptr<Engine>> engines;
 engines.emplace_back(unique_ptr<Engine>(x86_engine));
-
-const char* model_file = "tests/testdata/conv.onnx";
-
-RuntimeBuilder* builder = OnnxRuntimeBuilderFactory::Create(model_file, std::move(engines));
 ```
 
 `PPLNN` supports multiple engines running in the same model. For example:
@@ -53,11 +50,11 @@ Engine* cuda_engine = CudaEngineFactory::Create(CudaEngineOptions());
 vector<unique_ptr<Engine>> engines;
 engines.emplace_back(unique_ptr<Engine>(x86_engine));
 engines.emplace_back(unique_ptr<Engine>(cuda_engine));
-// add other engines
+// TODO add other engines
 
 const char* model_file = "/path/to/onnx/model";
 // use x86 and cuda engines to run this model
-vector<Engine*> engine_ptrs = {x86_engine, cuda_engine};
+vector<Engine*> engine_ptrs = {x86_engine.get(), cuda_engine.get()};
 RuntimeBuilder* builder = OnnxRuntimeBuilderFactory::Create(model_file, engine_ptrs.data(), engine_ptrs.size());
 ```
 
@@ -68,7 +65,7 @@ RuntimeBuilder* builder = OnnxRuntimeBuilderFactory::Create(model_file, engine_p
 We can use
 
 ```c++
-Runtime* OnnxRuntimeBuilder::CreateRuntime();
+Runtime* RuntimeBuilder::CreateRuntime();
 ```
 
 to create a `Runtime`:
@@ -94,13 +91,13 @@ for (uint32_t c = 0; c < runtime->GetInputCount(); ++c) {
     auto& shape = t->GetShape();
 
     auto nr_element = shape.GetBytesIncludingPadding() / sizeof(float);
-    unique_ptr<float[]> buffer(new float[nr_element]);
+    vector<float> buffer(nr_element);
 
     // fill random input data
     std::default_random_engine eng;
     std::uniform_real_distribution<float> dis(-1.0f, 1.0f);
     for (uint32_t i = 0; i < nr_element; ++i) {
-        buffer.get()[i] = dis(eng);
+        buffer[i] = dis(eng);
     }
 
     auto status = t->ReallocBuffer();
@@ -113,7 +110,7 @@ for (uint32_t c = 0; c < runtime->GetInputCount(); ++c) {
     src_desc.SetDataFormat(DATAFORMAT_NDARRAY);
 
     // input tensors may require different data format
-    status = t->ConvertFromHost(buffer.get(), src_desc);
+    status = t->ConvertFromHost((const void*)buffer.data(), src_desc);
     if (status != RC_SUCCESS) {
         // ......
     }
@@ -145,9 +142,9 @@ for (uint32_t c = 0; c < runtime->GetOutputCount(); ++c) {
     TensorShape dst_desc = t->GetShape();
     dst_desc.SetDataFormat(DATAFORMAT_NDARRAY);
     auto bytes = dst_desc.GetBytesIncludingPadding();
-    unique_ptr<char[]> buffer(new char[bytes]);
+    vector<char> buffer(bytes);
 
-    auto status = t->ConvertToHost(buffer.get(), dst_desc);
+    auto status = t->ConvertToHost((void*)buffer.data(), dst_desc);
     // ......
 }
 ```

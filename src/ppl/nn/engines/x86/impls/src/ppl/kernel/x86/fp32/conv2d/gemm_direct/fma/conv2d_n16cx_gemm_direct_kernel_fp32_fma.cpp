@@ -159,6 +159,9 @@ void conv2d_n16cx_gemm_direct_fp32_fma_blk1x6_kernel_core(
         ".irp IC,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15\n"
         "vmovups ((\\IC * CH_DT_BLK + 0 * CH_RF_BLK) * D_BYTES)(%%rbx), %%ymm14\n"
         "vmovups ((\\IC * CH_DT_BLK + 1 * CH_RF_BLK) * D_BYTES)(%%rbx), %%ymm15\n"
+        ".if HW_LEN > 3\n"
+        "prefetcht0 ((\\IC * CH_DT_BLK + CH_DT_BLK * CH_DT_BLK) * D_BYTES)(%%rbx)\n"
+        ".endif\n"
         ".if HW_LEN > 0\n"
         "vbroadcastss ((\\IC + 0 * CH_DT_BLK) * D_BYTES)(%%rax), %%ymm12\n"
         "vfmadd231ps %%ymm14, %%ymm12, %%ymm0\n"
@@ -378,7 +381,7 @@ void conv2d_n16cx_gemm_direct_fp32_fma_blk1x6_kernel(
     const int64_t *shar_param)
 {
 #ifdef PPL_USE_X86_INLINE_ASM
-    if (oc_len == 2 * CH_RF_BLK() && hw_len == 6) {
+    if (oc_len == 2 * CH_RF_BLK()) {
         conv2d_n16cx_gemm_direct_fp32_fma_blk1x6_kernel_core<nt_store, hw_len>(priv_param, shar_param);
         return;
     }
@@ -520,11 +523,25 @@ void conv2d_n16cx_gemm_direct_fp32_fma_blk1x6_kernel(
             channels -= CH_DT_BLK();
             const float *ic_src = icb_src;
             const float *ic_flt = icb_flt;
-            for (int64_t ic = 0; ic < CH_DT_BLK(); ++ic) {
-                IC_COMPUTE_STEP(0);
-                ic_src += 1;
-                ic_flt += CH_DT_BLK();
-            }
+            IC_COMPUTE_STEP(0);
+            IC_COMPUTE_STEP(1);
+            IC_COMPUTE_STEP(2);
+            IC_COMPUTE_STEP(3);
+
+            IC_COMPUTE_STEP(4);
+            IC_COMPUTE_STEP(5);
+            IC_COMPUTE_STEP(6);
+            IC_COMPUTE_STEP(7);
+
+            IC_COMPUTE_STEP(8);
+            IC_COMPUTE_STEP(9);
+            IC_COMPUTE_STEP(10);
+            IC_COMPUTE_STEP(11);
+
+            IC_COMPUTE_STEP(12);
+            IC_COMPUTE_STEP(13);
+            IC_COMPUTE_STEP(14);
+            IC_COMPUTE_STEP(15);
             icb_flt += CH_DT_BLK() * CH_DT_BLK();
             icb_src += src_icb_stride;
         }

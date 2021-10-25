@@ -18,6 +18,7 @@
 #include "cudakernel/arithmetic/relation.h"
 #include "ppl/common/types.h"
 #include <cuda_fp16.h>
+#include <algorithm>
 
 enum RelationOpType {
     Relation_Unknown = 0,
@@ -426,7 +427,7 @@ ppl::common::RetCode PPLCUDARelationForwardImpFp16(
 
     switch (output_shape->GetDataFormat()) {
         SWITCH_CASE(ppl::common::DATAFORMAT_NDARRAY, half, bool, 0, 1);
-        case ppl::common::DATAFORMAT_NHWC: {
+        case ppl::common::DATAFORMAT_NHWC8: {
             bool can_broadcast = (input_shape0->GetDimCount() >= 2) && (input_shape1->GetDimCount() >= 2);
             if (!can_broadcast) return ppl::common::RC_UNSUPPORTED;
             if ((input_shape0->GetDim(1) & 0x7) || (input_shape1->GetDim(1) & 0x7)) return ppl::common::RC_UNSUPPORTED;

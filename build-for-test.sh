@@ -3,9 +3,36 @@
 workdir=`pwd`
 x86_64_build_dir="${workdir}/x86-64-build"
 cuda_build_dir="${workdir}/cuda-build"
-processor_num=`cat /proc/cpuinfo | grep processor | grep -v grep | wc -l`
 
-options='-DCMAKE_BUILD_TYPE=Release'
+if [[ `uname` == "Linux" ]]; then
+    processor_num=`cat /proc/cpuinfo | grep processor | grep -v grep | wc -l`
+elif [[ `uname` == "Darwin" ]]; then
+    processor_num=`sysctl machdep.cpu | grep machdep.cpu.core_count | cut -d " " -f 2`
+else
+    processor_num=1
+fi
+
+options='-DCMAKE_BUILD_TYPE=Release -DPPLNN_ENABLE_PYTHON_API=ON'
+
+# --------------------------------------------------------------------------- #
+# preparing lua
+
+lua_version='5.3.6'
+lua_package="/tmp/lua-${lua_version}.tar.gz"
+if ! [ -f "${lua_package}" ]; then
+    wget --no-check-certificate -c "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" -O ${lua_package}
+fi
+
+lua_source_dir="/tmp/lua-${lua_version}"
+if ! [ -d "${lua_source_dir}" ]; then
+    cd /tmp
+    tar -xf ${lua_package}
+    cd ${lua_source_dir}
+    make posix -j8 MYCFLAGS="-DLUA_USE_DLOPEN -fPIC" MYLIBS=-ldl
+    cd ${workdir}
+fi
+
+options="$options -DPPLNN_ENABLE_LUA_API=ON -DLUA_INCLUDE_DIR=${lua_source_dir}/src -DLUA_LIBRARIES=${lua_source_dir}/src/liblua.a"
 
 # --------------------------------------------------------------------------- #
 
