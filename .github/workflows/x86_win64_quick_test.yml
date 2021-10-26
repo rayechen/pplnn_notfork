@@ -26,7 +26,7 @@ jobs:
 
       - name: Build
         run: |
-          cd ../../ && ./build_pplnn.ps ${{ github.run_id }} x86_64
+          cd ../../ && ./build_pplnn.ps1 ${{ github.run_id }} x86_64
       - name: Test
         run: |
-          cd ../../ && ./test_pplnn.ps ${{ github.run_id }} x86_64
+          cd ../../ && ./test_pplnn.ps1 ${{ github.run_id }} x86_64
