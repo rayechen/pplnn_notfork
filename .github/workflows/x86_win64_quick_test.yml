@@ -27,6 +27,13 @@ jobs:
       - name: Build
         run: |
           cd ../../ ; ./build_pplnn.ps1 ${{ github.run_id }} x86_64
+          
       - name: Test
         run: |
           cd ../../ ; ./test_pplnn.ps1 ${{ github.run_id }} x86_64
+
+      - name: clean
+        if: ${{ always() }}
+        run: |
+          cd ../../ && ./clean_pplnn.ps1 ${{ github.run_id }} x86_64
+          echo "clean up."
