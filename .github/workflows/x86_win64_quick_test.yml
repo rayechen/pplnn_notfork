@@ -20,10 +20,10 @@ jobs:
           #if ( Test-Path ${{ github.run_id }} ) { Remove-Item ${{ github.run_id }} -Recurse -Force}
           #mkdir ${{ github.run_id }}
           cd ../../ ; ./mk_src_dir.ps1 ${{ github.run_id }}
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          path: ${{ github.run_id }}
+      #- name: Checkout
+      #  uses: actions/checkout@v2
+      #  with:
+      #    path: ${{ github.run_id }}
 
       - name: Build
         run: |
