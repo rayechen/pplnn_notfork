@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: show vars
         run: |
-          cat $GITHUB_EVENT_PATH
-          echo "-"*100
           echo ${{ toJson(github) }}
           echo "github.event_name: ${{ github.event_name }}"
           echo "github.event.workflow_dispatch.user.login: ${{ github.event.workflow_dispatch.user.login }}"
@@ -29,3 +27,5 @@ jobs:
           echo "github.event.pull_request.user.login: ${{ github.event.pull_request.user.login }}"
           echo "github.event.pull_request.number: ${{ github.event.pull_request.number }}"
           echo "env.PR_NUMBER: ${{ env.PR_NUMBER }}"
+          echo "----------------------------------"
+          cat $GITHUB_EVENT_PATH
