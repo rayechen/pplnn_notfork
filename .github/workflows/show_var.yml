@@ -9,6 +9,9 @@ on:
     paths-ignore: ['.**', 'docker/**', 'docs/**', 'samples/**', README.md]
   workflow_dispatch:
 
+env:
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  
 jobs:
   build_and_test:
     runs-on: [self-hosted, connect_to_jenkins_dispatcher]
@@ -23,3 +26,6 @@ jobs:
           echo "github.event.workflow_dispatch.user.login: ${{ github.event.workflow_dispatch.user.login }}"
           echo "github.event.pull_request.user.login: ${{ github.event.pull_request.user.login }}"
           echo "github.event.pull_request.author.email: ${{ github.event.pull_request.author.email }}"
+          echo "github.event.pull_request.user.login: ${{ github.event.pull_request.user.login }}"
+          echo "github.event.pull_request.number: ${{ github.event.pull_request.number }}"
+          echo "env.PR_NUMBER: ${{ env.PR_NUMBER }}"
