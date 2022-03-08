@@ -7,6 +7,8 @@ on:
   pull_request:
     branches: [ master ]
     paths-ignore: ['.**', 'docker/**', 'docs/**', 'samples/**', README.md]
+    types:
+      - created
   workflow_dispatch:
 
 env:
