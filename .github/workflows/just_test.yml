@@ -1,0 +1,21 @@
+name: JustTest
+
+on:
+  #push:
+  #  branches: [ master ]
+  #  paths-ignore: ['.**', 'docker/**', 'docs/**', 'samples/**', README.md]
+  pull_request:
+    branches: [ master ]
+    paths-ignore: ['.**', 'docker/**', 'docs/**', 'samples/**', README.md]
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    runs-on: self-hosted
+
+    steps:
+      - name: Sleep
+        run: |
+          echo "sleep begin."
+          sleep 5m
+          echo "sleep end."
