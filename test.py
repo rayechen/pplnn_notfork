@@ -3,3 +3,6 @@
 
 # 调整为on pull request type : created
 2022.3.8 16:29 
+
+# yml增加打印ref和head_ref
+2022.3.9 12:49
