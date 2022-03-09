@@ -33,10 +33,13 @@ jobs:
           echo "github.event.pull_request.number: ${{ github.event.pull_request.number }}"
           echo "env.PR_NUMBER: ${{ env.PR_NUMBER }}"
           echo ${{ toJson(github) }}
+          echo "sleep begin."
+          sleep 10m
+          echo "sleep end.
           echo "github.event_name: ${{ github.event_name }}"
           echo "github.event.workflow_dispatch.user.login: ${{ github.event.workflow_dispatch.user.login }}"
           echo "github.event.pull_request.user.login: ${{ github.event.pull_request.user.login }}"
           echo "github.event.pull_request.author.email: ${{ github.event.pull_request.author.email }}"
           echo "github.event.pull_request.user.login: ${{ github.event.pull_request.user.login }}"
           echo "----------------------------------"
-          cat $GITHUB_EVENT_PATH
+          #cat $GITHUB_EVENT_PATH
