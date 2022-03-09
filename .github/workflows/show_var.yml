@@ -14,6 +14,10 @@ on:
 env:
   PR_NUMBER: ${{ github.event.pull_request.number }}
   
+concurrency: 
+  group: ${{ github.head_ref }}--${{ github.event_name }}--${{ github.ref }}
+  cancel-in-progress: true
+  
 jobs:
   build_and_test:
     runs-on: [self-hosted, connect_to_jenkins_dispatcher]
@@ -21,6 +25,7 @@ jobs:
     steps:
       - name: show vars
         run: |
+          echo "github.head_ref--github.event_name--github.ref: ${{ github.head_ref }}--${{ github.event_name }}--${{ github.ref }}"
           echo "github.ref: ${{ github.ref }}"
           echo "github.head_ref: ${{ github.head_ref }}"
           echo "github.event.pull_request.number: ${{ github.event.pull_request.number }}"
