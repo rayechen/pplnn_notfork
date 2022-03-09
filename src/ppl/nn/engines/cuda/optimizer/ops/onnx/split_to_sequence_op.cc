@@ -35,11 +35,19 @@ RetCode SplitToSequenceOp::Init(const OptKernelOptions& options) {
     auto param = static_cast<SplitToSequenceParam*>(attr_ref->second.get());
     op_.Init(param->axis, param->keepdims, common::SplitToSequenceOp::GenericSplitFunc);
 
-    infer_type_func_ = [this](InputOutputInfo* info, datatype_t type) -> RetCode {
-        return type != DATATYPE_UNKNOWN ? InferDefaultType(info, type) : InferInheritedType(info);
+    infer_type_func_ = [](InputOutputInfo* info, std::vector<CudaTensorQuant>* quant, datatype_t type) -> RetCode {
+        ppl::common::RetCode status;
+        if (type == DATATYPE_UNKNOWN) {
+            status = InferInheritedType(info);
+        } else if (type == DATATYPE_INT8) {
+            status = CopyQuantType(info, quant);
+        } else {
+            status = InferDefaultType(info, type);
+        }
+        return status;
     };
 
-    infer_dims_func_ = [this](InputOutputInfo* info) -> RetCode {
+    infer_dims_func_ = [](InputOutputInfo* info) -> RetCode {
         auto in_shape = &info->GetInput<TensorImpl>(0)->GetShape();
         for (uint32_t i = 0; i < info->GetOutputCount(); ++i) {
             auto out_shape = &info->GetOutput<TensorImpl>(0)->GetShape();

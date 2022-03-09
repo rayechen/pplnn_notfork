@@ -23,6 +23,7 @@
 #include <random>
 #include <chrono>
 
+#include <inttypes.h>
 #include <float.h>
 #include <string.h>
 
@@ -50,16 +51,16 @@
 #define DEBUG_TAG(X)
 #endif
 
-#define CASE_STRING_FMT() "m%ldn%ldk%ld_n%s"
+#define CASE_STRING_FMT() "m%" PRId64 "n%" PRId64 "k%" PRId64 "_n%s"
 
 Define_bool_opt("--help", Flag_help, false, "show these help information");
 Define_string(cfg, "", "(required) fc config file, format:" CASE_STRING_FMT());
 Define_int32(mb, 0, "(0) custom batch");
 Define_int32(warm_up, 10, "(10) warm up iterations");
 Define_int32(min_iter, 20, "(20) min benchmark iterations");
-Define_float(min_second, 1.0, "(1.0) min benchmark seconds");
+Define_float(min_second, 1.0f, "(1.0) min benchmark seconds");
 Define_bool(validate, false, "(false) do result validation");
-Define_float(eps, 1e-6, "(1e-6) rel error trunk for validation");
+Define_float(eps, 1e-6f, "(1e-6) rel error trunk for validation");
 
 int main(int argc, char **argv) {
     simple_flags::parse_args(argc, argv);
@@ -156,7 +157,7 @@ DEBUG_TAG(A);
         ppl::kernel::x86::fc_fp32_algo_info algoinfo;
 
         algoinfo = ppl::kernel::x86::fc_algo_selector::select_algo(ppl::common::DATAFORMAT_NDARRAY, param, ppl::common::GetCpuISA());
-        if (algoinfo.algo_type == ppl::kernel::x86::fc_fp32_algo::unknown) {
+        if (algoinfo.algo_type == ppl::kernel::x86::fc_fp32_algo::UNKNOWN) {
             std::cerr << "," << "unsupported case\n";
             continue;
         }
@@ -284,7 +285,7 @@ DEBUG_TAG(N);
                 return -1;
             }
             end = std::chrono::high_resolution_clock::now();
-            double dur = (end - start).count() / 1e3;
+            double dur = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() / 1e3;
             tot_exe_us += dur;
             if (dur < min_exe_us) {
                 min_exe_us = dur;
@@ -310,7 +311,15 @@ DEBUG_TAG(N);
 DEBUG_TAG(O);
         if (Flag_validate) {
             if (ppl::common::RC_SUCCESS != ppl::kernel::x86::gemm_ref_fp32(
-                src, filter, bias, nullptr, false, true, M, N, K, 1.0f, 1.0f, dst_ref)) {
+                    src, filter, bias, nullptr,
+                    ppl::kernel::x86::gemm_m_type::NOTRANS,
+                    ppl::kernel::x86::gemm_m_type::TRANS,
+                    ppl::kernel::x86::gemm_v_type::ROW_VEC,
+                    ppl::kernel::x86::gemm_m_type::EMPTY,
+                    M, N, K, K, K, N, 0,
+                    1.0f, 1.0f,
+                    ppl::kernel::x86::gemm_post::NONE,
+                    dst_ref)) {
                 std::cerr << "," << "gemm_ref_fp32 failed\n";
                 return -1;
             }

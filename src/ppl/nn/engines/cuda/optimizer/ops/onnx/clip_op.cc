@@ -26,11 +26,35 @@ using namespace ppl::common;
 namespace ppl { namespace nn { namespace cuda {
 
 RetCode ClipOp::Init(const OptKernelOptions& options) {
-    infer_type_func_ = [this](InputOutputInfo* info, datatype_t type) -> RetCode {
-        return type != DATATYPE_UNKNOWN ? InferDefaultType(info, type) : InferInheritedType(info);
+    infer_type_func_ = [](InputOutputInfo* info, std::vector<CudaTensorQuant>* quant, datatype_t type) -> RetCode {
+        ppl::common::RetCode status;
+        if (type == DATATYPE_UNKNOWN) {
+            status = InferInheritedType(info);
+        } else if (type == DATATYPE_INT8) {
+            status = CopyQuantType(info, quant);
+        } else {
+            status = InferDefaultType(info, type);
+        }
+        auto input1 = info->GetInput<TensorImpl>(1);
+        if (input1 != nullptr)
+            input1->GetShape().SetDataType(DATATYPE_FLOAT32);
+        auto input2 = info->GetInput<TensorImpl>(2);
+        if (input2 != nullptr)
+            input2->GetShape().SetDataType(DATATYPE_FLOAT32);
+        return status;
     };
 
     infer_dims_func_ = GenericInferDims;
+
+    auto data = options.graph->data.get();
+    auto min_edge_id = GetNode()->GetInput(1);
+    if (min_edge_id != INVALID_EDGEID) {
+        param_.min_val = *((float*)data->constants[min_edge_id].data.data());
+    }
+    auto max_edge_id = GetNode()->GetInput(2);
+    if (max_edge_id != INVALID_EDGEID) {
+        param_.max_val = *((float*)data->constants[max_edge_id].data.data());
+    }
     return RC_SUCCESS;
 }
 
@@ -45,7 +69,7 @@ RetCode ClipOp::Finalize(const OptKernelOptions& options) {
 }
 
 KernelImpl* ClipOp::CreateKernelImpl() const {
-    return CreateKernelImplWithoutParam<ClipKernel>();
+    return CreateKernelImplWithParam<ClipKernel>(&param_);
 }
 
 }}} // namespace ppl::nn::cuda

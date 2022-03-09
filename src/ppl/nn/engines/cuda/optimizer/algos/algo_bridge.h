@@ -27,31 +27,31 @@ namespace ppl { namespace nn { namespace cuda {
 class BridgeAlgorithm : public Algorithm {
 public:
     BridgeAlgorithm() {
-        std::set<dataformat_t> ndarray{DATAFORMAT_NDARRAY, DATAFORMAT_NHWC};
-        bridge_formats_.emplace(DATAFORMAT_NDARRAY, ndarray);
-        std::set<dataformat_t> nhwc{DATAFORMAT_NDARRAY, DATAFORMAT_NHWC};
-        bridge_formats_.emplace(DATAFORMAT_NHWC, nhwc);
+        std::set<dataformat_t> all_formats{DATAFORMAT_NDARRAY, DATAFORMAT_NHWC8, DATAFORMAT_NHWC16};
+        bridge_formats_.emplace(DATAFORMAT_NDARRAY, all_formats);
+        bridge_formats_.emplace(DATAFORMAT_NHWC8, all_formats);
+        bridge_formats_.emplace(DATAFORMAT_NHWC16, all_formats);
     }
 
-    void GetAttrParam(void*& param) override {
+    void GetAttrParam(void*& param) const override {
         return;
     };
     void DeleteAttrParam(void*& param) override {
         return;
     };
 
-    const std::map<dataformat_t, std::set<dataformat_t>> Getformats(const std::string& type_name) override {
+    const std::map<dataformat_t, std::set<dataformat_t>> Getformats(const std::string& type_name) const override {
         return bridge_formats_;
     }
 
-    const double ExcuteTimer(ir::Node* node, OptKernelOptions& options) override;
+    double ExcuteTimer(const ir::Node* node, OptKernelOptions& options) override;
 
     RetCode ModifyParam(const ir::Node*, OptKernelOptions& options) override {
         return RC_SUCCESS;
     }
 
     void ReshapeOnEdges(const ir::Node* node, std::map<edgeid_t, std::unique_ptr<TensorImpl>>* tensors,
-                        dataformat_t input_format, dataformat_t output_format) override;
+                        ppl::common::dataformat_t input_format, ppl::common::dataformat_t output_format) override;
 
 private:
     std::map<dataformat_t, std::set<dataformat_t>> bridge_formats_;

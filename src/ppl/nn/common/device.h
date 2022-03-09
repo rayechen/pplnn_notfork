@@ -22,9 +22,9 @@
 #include "ppl/common/allocator.h"
 #include "ppl/nn/common/tensor_shape.h"
 #include "ppl/nn/common/buffer_desc.h"
+#include "ppl/nn/common/device_context.h"
 #include "ppl/nn/common/data_converter.h"
 #include "ppl/nn/common/types.h"
-#include "ppl/nn/runtime/barrier.h"
 
 namespace ppl { namespace nn {
 
@@ -93,13 +93,11 @@ public:
     */
     virtual ppl::common::RetCode Copy(BufferDesc* dst, const BufferDesc& src, const TensorShape& shape) const = 0;
 
-    /** @brief create a barrier that is used for synchronization between different devices. */
-    virtual std::shared_ptr<Barrier> CreateBarrier() {
-        return std::shared_ptr<Barrier>();
-    }
-
     /** @brief get DataConverter that can process data on this device */
     virtual const DataConverter* GetDataConverter() const = 0;
+
+    /** @brief get context of this device */
+    virtual DeviceContext* GetContext() const = 0;
 };
 
 }} // namespace ppl::nn

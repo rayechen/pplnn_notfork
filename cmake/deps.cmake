@@ -43,11 +43,10 @@ endif()
 
 FetchContent_Declare(hpcc
     GIT_REPOSITORY https://github.com/openppl-public/hpcc.git
-    GIT_TAG v0.1.3
-    GIT_SHALLOW TRUE
+    GIT_TAG af532951283fa95861e8c14f3d797818ee526156
     SOURCE_DIR ${HPCC_DEPS_DIR}/hpcc
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/hpcc-build
-    SUBBUILD_DIR ${HPCC_DEPS_DIR}/hpcc-subbuild
+    SUBBUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/hpcc-subbuild
     UPDATE_DISCONNECTED True)
 
 FetchContent_GetProperties(hpcc)
@@ -58,20 +57,22 @@ endif()
 
 # --------------------------------------------------------------------------- #
 
-set(PPLCOMMON_BUILD_TESTS OFF CACHE BOOL "disable ppl.common tests")
-set(PPLCOMMON_BUILD_BENCHMARK OFF CACHE BOOL "disable ppl.common benchmark")
+set(PPLCOMMON_BUILD_TESTS OFF CACHE BOOL "disable pplcommon tests")
+set(PPLCOMMON_BUILD_BENCHMARK OFF CACHE BOOL "disable pplcommon benchmark")
+set(PPLCOMMON_ENABLE_PYTHON_API ${PPLNN_ENABLE_PYTHON_API})
+set(PPLCOMMON_ENABLE_LUA_API ${PPLNN_ENABLE_LUA_API})
 
-hpcc_declare_git_dep(ppl.common
+hpcc_declare_git_dep(pplcommon
     https://github.com/openppl-public/ppl.common.git
-    v0.2.4)
+    fbbabec28c23e6cefc8941522a6bcfbb06b29966)
 
 # --------------------------------------------------------------------------- #
 
 set(protobuf_BUILD_TESTS OFF CACHE BOOL "disable protobuf tests")
 
-hpcc_declare_git_dep(protobuf
-    https://github.com/protocolbuffers/protobuf.git
-    v3.1.0)
+hpcc_declare_pkg_dep(protobuf
+    https://github.com/protocolbuffers/protobuf/releases/download/v3.12.4/protobuf-cpp-3.12.4.zip
+    41651ed9f6cd35063f57003ff24bacfb)
 
 # --------------------------------------------------------------------------- #
 
@@ -79,9 +80,9 @@ set(RAPIDJSON_BUILD_TESTS OFF CACHE BOOL "disable rapidjson tests")
 set(RAPIDJSON_BUILD_EXAMPLES OFF CACHE BOOL "disable rapidjson examples")
 set(RAPIDJSON_BUILD_DOC OFF CACHE BOOL "disable rapidjson docs")
 
-hpcc_declare_git_dep(rapidjson
-    https://github.com/Tencent/rapidjson.git
-    master)
+hpcc_declare_pkg_dep(rapidjson
+    https://github.com/Tencent/rapidjson/archive/2e8f5d897d9d461a7273b4b812b0127f321b1dcf.zip
+    aadb4462dab0f019a5522ae4489ee1aa)
 
 # --------------------------------------------------------------------------- #
 
@@ -90,15 +91,23 @@ set(PYBIND11_TEST OFF CACHE BOOL "disable pybind11 tests")
 set(PYBIND11_NOPYTHON ON CACHE BOOL "do not find python")
 set(PYBIND11_FINDPYTHON OFF CACHE BOOL "do not find python")
 
-hpcc_declare_git_dep(pybind11
-    https://github.com/pybind/pybind11.git
-    v2.7.0)
+hpcc_declare_pkg_dep(pybind11
+    https://github.com/pybind/pybind11/archive/refs/tags/v2.7.1.zip
+    cc6d9f0c21694e7c4ec4a00f077de61b)
+
+# --------------------------------------------------------------------------- #
+
+set(LUACPP_INSTALL OFF CACHE BOOL "")
+
+hpcc_declare_pkg_dep(luacpp
+    https://github.com/ouonline/lua-cpp/archive/6074d360820af5f1459f39b1a731b788be0643a0.zip
+    401fdb315bfb3863f789afdd1296084d)
 
 # --------------------------------------------------------------------------- #
 
 set(INSTALL_GTEST OFF CACHE BOOL "")
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
 
-hpcc_declare_git_dep(googletest
-    https://github.com/google/googletest.git
-    release-1.10.0)
+hpcc_declare_pkg_dep(googletest
+    https://github.com/google/googletest/archive/refs/tags/release-1.10.0.zip
+    82358affdd7ab94854c8ee73a180fc53)

@@ -34,15 +34,23 @@ RetCode ConcatOp::Init(const OptKernelOptions& options) {
         return status;
     }
 
-    infer_type_func_ = [this](InputOutputInfo* info, datatype_t type) -> RetCode {
-        return type != DATAFORMAT_UNKNOWN ? InferDefaultType(info, type) : InferHighestType(info);
+    infer_type_func_ = [](InputOutputInfo* info, std::vector<CudaTensorQuant>* quant, datatype_t type) -> RetCode {
+        ppl::common::RetCode status;
+        if (type == DATATYPE_UNKNOWN) {
+            status = InferHighestType(info);
+        } else if (type == DATATYPE_INT8) {
+            status = UnifyToOutputQuant(info, quant);
+        } else {
+            status = InferDefaultType(info, type);
+        }
+        return status;
     };
 
     infer_dims_func_ = [this](InputOutputInfo* info) -> RetCode {
         return oputils::ReshapeConcat(info, &param_);
     };
 
-    infer_unsafe_dims_func_ = [this](InputOutputInfo* info, std::set<uint32_t>* illegal_inputs) -> RetCode {
+    infer_unsafe_dims_func_ = [](InputOutputInfo* info, std::set<uint32_t>* illegal_inputs) -> RetCode {
         auto in_shape0 = &info->GetInput<TensorImpl>(0)->GetShape();
         for (uint32_t i = 0; i < info->GetInputCount(); ++i) {
             if (illegal_inputs->find(i) != illegal_inputs->end()) {

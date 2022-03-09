@@ -45,13 +45,13 @@ RetCode X86Engine::Init(const X86EngineOptions& options) {
     return RC_SUCCESS;
 }
 
-EngineContext* X86Engine::CreateEngineContext(const string&) {
-    return new X86EngineContext(GetName(), device_.GetISA(), options_.mm_policy);
+EngineContext* X86Engine::CreateEngineContext() {
+    return new X86EngineContext(device_.GetISA(), options_.mm_policy);
 }
 
-bool X86Engine::CanRunOp(const ir::Node* node) const {
+bool X86Engine::Supports(const ir::Node* node) const {
     auto& type = node->GetType();
-    return (OptKernelCreatorManager::Instance()->Find(type.domain, type.name) != nullptr);
+    return (OptKernelCreatorManager::Instance()->Find(type.domain, type.name, type.version) != nullptr);
 }
 
 RetCode X86Engine::DoOptimize(ir::Graph* graph, utils::SharedResource* resource, RuntimePartitionInfo* info) {
@@ -96,8 +96,18 @@ RetCode X86Engine::DisableAVX512(X86Engine* engine, va_list) {
     return RC_SUCCESS;
 }
 
+RetCode X86Engine::DisableAVXFMA3(X86Engine* engine, va_list) {
+    auto isa = engine->device_.GetISA();
+    isa &= (~ppl::common::ISA_X86_AVX512);
+    isa &= (~ppl::common::ISA_X86_FMA);
+    isa &= (~ppl::common::ISA_X86_AVX);
+    engine->device_.SetISA(isa);
+    return RC_SUCCESS;
+}
+
 X86Engine::ConfHandlerFunc X86Engine::conf_handlers_[] = {
     X86Engine::DisableAVX512,
+    X86Engine::DisableAVXFMA3,
 };
 
 RetCode X86Engine::Configure(uint32_t option, ...) {

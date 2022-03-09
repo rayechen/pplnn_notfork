@@ -1,3 +1,5 @@
+option(PPLNN_ENABLE_CUDA_JIT "enable cuda JIT support" ON)
+
 # ----- required cuda version >= 10.2 ----- #
 
 find_package(CUDA REQUIRED)
@@ -11,6 +13,6 @@ file(GLOB_RECURSE PPLNN_CUDA_SRC src/ppl/nn/engines/cuda/*.cc)
 list(APPEND PPLNN_SOURCES ${PPLNN_CUDA_SRC})
 
 add_subdirectory(src/ppl/nn/engines/cuda/impls)
-list(APPEND PPLNN_LINK_LIBRARIES PPLCUDAKernel)
+list(APPEND PPLNN_LINK_LIBRARIES pplkernelcuda_static)
 
 list(APPEND PPLNN_COMPILE_DEFINITIONS PPLNN_USE_CUDA)

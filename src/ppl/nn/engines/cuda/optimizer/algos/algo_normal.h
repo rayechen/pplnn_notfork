@@ -28,45 +28,45 @@ class NormalAlgorithm : public Algorithm {
 public:
     NormalAlgorithm() {
         std::set<dataformat_t> ndarray{DATAFORMAT_NDARRAY};
-        std::set<dataformat_t> nhwc{DATAFORMAT_NHWC};
+        std::set<dataformat_t> nhwc8{DATAFORMAT_NHWC8};
 
         ndarray_formats_.emplace(DATAFORMAT_NDARRAY, ndarray);
-        nhwc_formats_.emplace(DATAFORMAT_NHWC, nhwc);
+        nhwc8_formats_.emplace(DATAFORMAT_NHWC8, nhwc8);
         inherited_formats_.emplace(DATAFORMAT_NDARRAY, ndarray);
-        inherited_formats_.emplace(DATAFORMAT_NHWC, nhwc);
+        inherited_formats_.emplace(DATAFORMAT_NHWC8, nhwc8);
         arbitrary_formats_.emplace(DATAFORMAT_NDARRAY, ndarray);
-        arbitrary_formats_.emplace(DATAFORMAT_NHWC, ndarray);
+        arbitrary_formats_.emplace(DATAFORMAT_NHWC8, ndarray);
     }
 
-    void GetAttrParam(void*& param) override {
+    void GetAttrParam(void*& param) const override {
         return;
     };
     void DeleteAttrParam(void*& param) override {
         return;
     };
-    const std::map<dataformat_t, std::set<dataformat_t>> Getformats(const std::string& type_name) override {
+    const std::map<dataformat_t, std::set<dataformat_t>> Getformats(const std::string& type_name) const override {
         if (inherited_set_.find(type_name) != inherited_set_.end()) {
             return inherited_formats_;
         }
         if (arbitrary_set_.find(type_name) != arbitrary_set_.end()) {
             return arbitrary_formats_;
         }
-        if (nhwc_set_.find(type_name) != nhwc_set_.end()) {
-            return nhwc_formats_;
+        if (nhwc8_set_.find(type_name) != nhwc8_set_.end()) {
+            return nhwc8_formats_;
         }
         return ndarray_formats_;
     }
 
-    const double ExcuteTimer(ir::Node* node, OptKernelOptions& options) override;
+    double ExcuteTimer(const ir::Node* node, OptKernelOptions& options) override;
     RetCode ModifyParam(const ir::Node*, OptKernelOptions& options) override {
         return RC_SUCCESS;
     }
     void ReshapeOnEdges(const ir::Node* node, std::map<edgeid_t, std::unique_ptr<TensorImpl>>* tensors,
-                        dataformat_t input_format, dataformat_t output_format) override;
+                        ppl::common::dataformat_t input_format, ppl::common::dataformat_t output_format) override;
 
 private:
     std::map<dataformat_t, std::set<dataformat_t>> ndarray_formats_;
-    std::map<dataformat_t, std::set<dataformat_t>> nhwc_formats_;
+    std::map<dataformat_t, std::set<dataformat_t>> nhwc8_formats_;
     std::map<dataformat_t, std::set<dataformat_t>> inherited_formats_;
     std::map<dataformat_t, std::set<dataformat_t>> arbitrary_formats_;
     std::set<std::string> inherited_set_{"Add",
@@ -87,7 +87,7 @@ private:
                                          "Split",
                                          "Sigmoid"};
     std::set<std::string> arbitrary_set_{"Shape"};
-    std::set<std::string> nhwc_set_{"ChannelShuffle"};
+    std::set<std::string> nhwc8_set_{"ChannelShuffle"};
 };
 
 }}} // namespace ppl::nn::cuda

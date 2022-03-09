@@ -22,32 +22,32 @@
 
 #define HALF_MIN  half(-65504)
 #define HALF2_MIN half2(-65504, -65504)
-#define PPL_CUDA_HALF2_MAX(a, b) \
-      do {                                            	\
-        (a).x = __hgt((a).x, (b).x) ? (a).x : (b).x;	\
-        (a).y = __hgt((a).y, (b).y) ? (a).y : (b).y;	\
-      } while (0)
-
+#define PPL_CUDA_HALF2_MAX(a, b)                     \
+    do {                                             \
+        (a).x = __hgt((a).x, (b).x) ? (a).x : (b).x; \
+        (a).y = __hgt((a).y, (b).y) ? (a).y : (b).y; \
+    } while (0)
 
 __global__ void ppl_cukernel_pooling_max_global_shuffle(
-  const float* input,
-  float* output,
-  int batch,
-  int pad_channels,
-  int HW)
+    const float* input,
+    float* output,
+    int batch,
+    int pad_channels,
+    int HW)
 {
-    int c = (blockIdx.y * blockDim.y + threadIdx.y);
+    int c  = (blockIdx.y * blockDim.y + threadIdx.y);
     int bc = blockIdx.z * pad_channels + c;
-    if (c >= pad_channels) return;
+    if (c >= pad_channels)
+        return;
 
     float res = -FLT_MAX;
     for (int i = threadIdx.x * 2; i < HW; i += 64) {
-        bool pred0 = i + 0 < HW;
-        bool pred1 = i + 1 < HW;
+        bool pred0  = i + 0 < HW;
+        bool pred1  = i + 1 < HW;
         float ival0 = pred0 ? input[bc * HW + i + 0] : -FLT_MAX;
         float ival1 = pred1 ? input[bc * HW + i + 1] : -FLT_MAX;
-        res = (res > ival0) ? res : ival0;
-        res = (res > ival1) ? res : ival1;
+        res         = (res > ival0) ? res : ival0;
+        res         = (res > ival1) ? res : ival1;
     }
 
     for (int offset = 16; offset > 0; offset /= 2) {
@@ -57,15 +57,20 @@ __global__ void ppl_cukernel_pooling_max_global_shuffle(
         float sval = __shfl_down(res, offset);
 #endif
         res = (res > sval) ? res : sval;
-      }
-  
+    }
+
     // store output
     if (threadIdx.x == 0)
         output[bc] = res;
 }
 
 __global__ void ppl_cukernel_pooling_max_global_shuffle_half(
-  const half* input, half* output, int batch, int pad_channels, int HW) {
+    const half* input,
+    half* output,
+    int batch,
+    int pad_channels,
+    int HW)
+{
 #if __CUDA_ARCH__ >= 600 && __CUDACC_VER_MAJOR__ >= 9
     int c  = (blockIdx.y * blockDim.y + threadIdx.y);
     int bc = blockIdx.z * pad_channels + c;
@@ -97,7 +102,7 @@ __global__ void ppl_cukernel_pooling_max_global_shuffle_half(
 #endif
 }
 
-__global__ void ppl_cukernel_pooling_max_global_shuffle_half2_NHWC(
+__global__ void ppl_cukernel_pooling_max_global_shuffle_half2_NHWC8(
     const half2* input,
     half2* output,
     int batch,
@@ -155,13 +160,13 @@ ppl::common::RetCode PPLCUDAGlobalMaxPoolingForwardImpFp16(
     if (output_shape->GetDataFormat() == ppl::common::DATAFORMAT_NDARRAY) {
         dim_grid.y = (pad_channels + dim_block.y - 1) / dim_block.y;
         ppl_cukernel_pooling_max_global_shuffle_half<<<dim_grid, dim_block, 0, stream>>>((const half*)input, (half*)output, batch, pad_channels, in_height * in_width);
-    } else if (output_shape->GetDataFormat() == ppl::common::DATAFORMAT_NHWC) {
+    } else if (output_shape->GetDataFormat() == ppl::common::DATAFORMAT_NHWC8) {
         // use half2, default padded
         dim3 dim_block(32, 8, 1); // (c, hw, 1)
         int padChannelsDivide = (pad_channels >> 1); // half2
         int channel_blocks    = (padChannelsDivide + dim_block.x - 1) / dim_block.x;
         dim3 dim_grid(channel_blocks, 1, batch);
-        ppl_cukernel_pooling_max_global_shuffle_half2_NHWC<<<dim_grid,
+        ppl_cukernel_pooling_max_global_shuffle_half2_NHWC8<<<dim_grid,
                                                               dim_block,
                                                               0,
                                                               stream>>>((const half2*)input, (half2*)output, batch, padChannelsDivide, in_height * in_width);
@@ -174,21 +179,22 @@ ppl::common::RetCode PPLCUDAGlobalMaxPoolingForwardImpFp16(
 
 ppl::common::RetCode PPLCUDAGlobalMaxPoolingForwardImpFp32(
     cudaStream_t stream,
-    ppl::nn::TensorShape* input_shape, const float* input,
-    ppl::nn::TensorShape* output_shape, float* output) {
-    
-    int batch = output_shape->GetDim(0);
+    ppl::nn::TensorShape* input_shape,
+    const float* input,
+    ppl::nn::TensorShape* output_shape,
+    float* output)
+{
+    int batch        = output_shape->GetDim(0);
     int pad_channels = output_shape->GetDim(1) + output_shape->GetPadding1(1);
-    int in_height = input_shape->GetDim(2); int in_width = input_shape->GetDim(3);
+    int in_height    = input_shape->GetDim(2);
+    int in_width     = input_shape->GetDim(3);
 
     dim3 dim_block(32, 4, 1);
     dim3 dim_grid(1, 1, batch);
 
     if (output_shape->GetDataFormat() == ppl::common::DATAFORMAT_NDARRAY) {
         dim_grid.y = (pad_channels + dim_block.y - 1) / dim_block.y;
-        ppl_cukernel_pooling_max_global_shuffle<<<dim_grid, dim_block,
-            0, stream>>>((const float*)input, (float*)output, batch, pad_channels,
-            in_height * in_width);
+        ppl_cukernel_pooling_max_global_shuffle<<<dim_grid, dim_block, 0, stream>>>((const float*)input, (float*)output, batch, pad_channels, in_height * in_width);
     } else {
         return ppl::common::RC_UNSUPPORTED;
     }

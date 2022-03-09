@@ -33,14 +33,15 @@ namespace ppl { namespace nn { namespace cuda {
 
 class OptGraph final {
 public:
-    OptGraph(ir::Graph* graph, RuntimePartitionInfo* info, utils::SharedResource* resource, CudaArgs* args)
-        : graph_(graph), info_(info), resource_(resource), args_(args) {}
+    OptGraph(ir::Graph* graph, RuntimePartitionInfo* info, utils::SharedResource* resource, CudaArgs* args, CompileInfo* compile_set)
+        : graph_(graph), info_(info), resource_(resource), args_(args), compile_set_(compile_set) {}
     ~OptGraph();
 
     ppl::common::RetCode DoOptimize(CudaDevice*);
 
 private:
     ppl::common::RetCode InitKernels();
+    ppl::common::RetCode InitQuantization();
     ppl::common::RetCode UpdateDims();
     ppl::common::RetCode FuseOperator();
     ppl::common::RetCode AddBridgeKernels();
@@ -56,6 +57,7 @@ private:
     RuntimePartitionInfo* info_;
     utils::SharedResource* resource_;
     CudaArgs* args_;
+    CompileInfo* compile_set_;
     std::set<nodeid_t> illegal_dims_;
     utils::GenericCpuDevice default_cpu_device_;
     std::map<edgeid_t, std::unique_ptr<TensorImpl>> tensor_impls_;

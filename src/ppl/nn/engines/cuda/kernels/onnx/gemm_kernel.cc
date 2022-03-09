@@ -58,6 +58,26 @@ ppl::common::RetCode GemmKernel::DoExecute(KernelExecContext* ctx) {
     auto weight = ctx->GetInput<TensorImpl>(1);
     auto output = ctx->GetOutput<TensorImpl>(0);
 
+    // convert filter only if the filter tensor is an output of another kernel
+    BufferDesc weight_buffer;
+    auto newshape = weight->GetShape();
+    if (!param_->extra_param.is_initializer_weight) {    
+        auto align_size = 8;
+        newshape.SetDim(0, (newshape.GetDim(0) + align_size - 1) / align_size * align_size);
+
+        auto status = GetCudaDevice()->Realloc(newshape, &weight_buffer);
+        if (status != ppl::common::RC_SUCCESS) {
+            LOG(ERROR) << "alloc buffer for constant failed: " << GetRetCodeStr(status);
+            return status;
+        }
+        auto stream = GetStream();
+        PPLCUDAGemmModifyWeights(stream, &newshape, weight->GetBufferPtr(), weight_buffer.addr,
+                                      &param_->param);
+    }
+    BufferDescGuard __tmp_buffer_guard__(&weight_buffer, [this](BufferDesc* buffer) {
+        GetDevice()->Free(buffer);
+    });
+
     TensorShape bias_shape;
     void* bias = nullptr;
     if (ctx->GetInputCount() >= 3) {
@@ -66,16 +86,14 @@ ppl::common::RetCode GemmKernel::DoExecute(KernelExecContext* ctx) {
     }
 
     fuse_param_t temp_fuse_param;
-    ConvertToEmptyFuseParam(temp_fuse_param);
-    temp_fuse_param.has_activation = param_->extra_param.has_activation;
-    temp_fuse_param.has_clip = param_->extra_param.has_clip;
-    temp_fuse_param.clip_min = param_->extra_param.clip.min_val;
-    temp_fuse_param.clip_max = param_->extra_param.clip.max_val;
+    ConvertToForwardFuseParam(ctx, GetCudaDevice(), param_->extra_param.fuse_info, temp_fuse_param);
 
     auto stream = GetStream();
-    status = PPLCUDAGemmForwardImp(stream, &input->GetShape(), input->GetBufferPtr(), &weight->GetShape(),
+    CUDAModule* module = static_cast<CUDAModule*>(this->GetCommonParam()->module);
+
+    status = PPLCUDAGemmForwardImp(stream, module, &input->GetShape(), input->GetBufferPtr(), &weight->GetShape(),
                                    weight->GetBufferPtr(), bias, &output->GetShape(), output->GetBufferPtr(),
-                                   param_->param, tmp_buffer, temp_fuse_param, param_->extra_param.kernel_index);
+                                   param_->param, tmp_buffer, temp_fuse_param, param_->extra_param.algo_info);
 
     return status;
 }

@@ -27,14 +27,21 @@ using namespace ppl::common;
 namespace ppl { namespace nn { namespace cuda {
 
 RetCode ScatterNDOp::Init(const OptKernelOptions& options) {
-    infer_type_func_ = [this](InputOutputInfo* info, datatype_t type) -> RetCode {
-        auto status = type != DATATYPE_UNKNOWN ? InferDefaultType(info, type) : InferInheritedType(info);
+    infer_type_func_ = [](InputOutputInfo* info, std::vector<CudaTensorQuant>* quant, datatype_t type) -> RetCode {
+        ppl::common::RetCode status;
+        if (type == DATATYPE_UNKNOWN) {
+            status = InferInheritedType(info);
+        } else if (type == DATATYPE_INT8) {
+            status = CopyQuantType(info, quant);
+        } else {
+            status = InferDefaultType(info, type);
+        }
         auto shape = &info->GetInput<TensorImpl>(1)->GetShape();
         shape->SetDataType(DATATYPE_INT64);
         return status;
     };
 
-    infer_dims_func_ = [this](InputOutputInfo* info) -> RetCode {
+    infer_dims_func_ = [](InputOutputInfo* info) -> RetCode {
         return oputils::ReshapeScatterND(info, nullptr);
     };
 

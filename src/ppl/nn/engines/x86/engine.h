@@ -29,8 +29,8 @@ public:
     X86Engine();
     ppl::common::RetCode Init(const X86EngineOptions&);
     ppl::common::RetCode Configure(uint32_t, ...) override;
-    EngineContext* CreateEngineContext(const std::string& graph_name) override;
-    bool CanRunOp(const ir::Node*) const override;
+    EngineContext* CreateEngineContext() override;
+    bool Supports(const ir::Node*) const override;
     ppl::common::RetCode ProcessGraph(utils::SharedResource*, ir::Graph*, RuntimePartitionInfo*) override;
 
 private:
@@ -42,6 +42,7 @@ private:
      * defined as member functions can avoid exporting unnecessary APIs
      */
     static ppl::common::RetCode DisableAVX512(X86Engine*, va_list);
+    static ppl::common::RetCode DisableAVXFMA3(X86Engine*, va_list);
 
     typedef ppl::common::RetCode (*ConfHandlerFunc)(X86Engine*, va_list);
     static ConfHandlerFunc conf_handlers_[X86_CONF_MAX];

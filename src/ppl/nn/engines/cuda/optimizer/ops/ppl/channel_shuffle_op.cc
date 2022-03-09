@@ -27,18 +27,23 @@ using namespace ppl::nn::common;
 namespace ppl { namespace nn { namespace cuda {
 
 RetCode ChannelShuffleOp::Init(const OptKernelOptions& options) {
-    infer_type_func_ = [this](InputOutputInfo* info, datatype_t type) -> RetCode {
-        auto in_shape = &info->GetInput<TensorImpl>(0)->GetShape();
-        for (uint32_t i = 0; i < info->GetOutputCount(); ++i) {
-            auto out_shape = &info->GetOutput<TensorImpl>(i)->GetShape();
-            out_shape->SetDataType(in_shape->GetDataType());
+    infer_type_func_ = [](InputOutputInfo* info, std::vector<CudaTensorQuant>* quant, datatype_t type) -> RetCode {
+        ppl::common::RetCode status;
+        if (type == DATATYPE_UNKNOWN) {
+            status = InferInheritedType(info);
+        } else if (type == DATATYPE_INT8) {
+            status = CopyQuantType(info, quant);
+        } else {
+            status = InferDefaultType(info, type);
         }
-        return ppl::common::RC_SUCCESS;
+        return status;
     };
 
-    infer_dims_func_ = [this](InputOutputInfo* info) -> RetCode {
+    infer_dims_func_ = [](InputOutputInfo* info) -> RetCode {
         auto& in_shape0 = info->GetInput<TensorImpl>(0)->GetShape();
-        info->GetOutput<TensorImpl>(0)->GetShape().Reshape(in_shape0.GetDims(), in_shape0.GetRealDimCount());
+        for (uint32_t i = 0; i < info->GetOutputCount(); ++i) {
+            info->GetOutput<TensorImpl>(i)->GetShape().Reshape(in_shape0.GetDims(), in_shape0.GetRealDimCount());
+        }
         return RC_SUCCESS;
     };
     return RC_SUCCESS;

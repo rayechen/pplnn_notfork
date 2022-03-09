@@ -26,8 +26,11 @@
 #ifndef PPLNN_CUDA_DEBUG_TRACE
 #if defined(DEBUG) || !defined(NDEBUG)
 #include <stdio.h>
-#define PPLNN_CUDA_DEBUG_TRACE(fmt, ...) \
-    fprintf(stderr, "T [%s:%u] " fmt, ppl::common::stripfilename(__FILE__), __LINE__, ##__VA_ARGS__)
+#define PPLNN_CUDA_DEBUG_TRACE(fmt, ...)                                                                  \
+    do {                                                                                                  \
+        fprintf(stderr, "T [%s:%u] " fmt, ppl::common::stripfilename(__FILE__), __LINE__, ##__VA_ARGS__); \
+        fflush(stderr);                                                                                   \
+    } while (0)
 #else
 #define PPLNN_CUDA_DEBUG_TRACE(fmt, ...)
 #endif // DEBUG

@@ -28,17 +28,23 @@ using namespace ppl::nn::common;
 namespace ppl { namespace nn { namespace cuda {
 
 RetCode ConvTransposeOp::Init(const OptKernelOptions& options) {
-    auto status = GenericLoadParam<ConvTransposeParam>(options, &param_);
+    auto status = GenericLoadParam<ConvTransposeParam>(options, &param_.param);
     if (status != RC_SUCCESS) {
         LOG(ERROR) << "load param failed: " << GetRetCodeStr(status);
         return status;
     }
 
-    infer_type_func_ = [this](InputOutputInfo* info, datatype_t type) -> RetCode {
-        if (type == ppl::common::DATATYPE_UNKNOWN) {
-            type = ppl::common::DATATYPE_FLOAT16;
+    infer_type_func_ = [](InputOutputInfo* info, std::vector<CudaTensorQuant>* quant, datatype_t type) -> RetCode {
+        type = ppl::common::DATATYPE_FLOAT16;
+        ppl::common::RetCode status;
+        if (type == DATATYPE_UNKNOWN) {
+            status = InferInheritedType(info);
+        } else if (type == DATATYPE_INT8) {
+            status = CopyQuantType(info, quant);
+        } else {
+            status = InferDefaultType(info, type);
         }
-        return InferDefaultType(info, type);
+        return status;
     };
 
     infer_dims_func_ = [this](InputOutputInfo* info) -> RetCode {
@@ -49,6 +55,8 @@ RetCode ConvTransposeOp::Init(const OptKernelOptions& options) {
 }
 
 RetCode ConvTransposeOp::Finalize(const OptKernelOptions& options) {
+    param_ = *((CudaConvTransposeParam*)options.param);
+
     auto status = SetCommonParam(options);
     if (status != RC_SUCCESS) {
         LOG(ERROR) << "load common param failed: " << GetRetCodeStr(status);
@@ -56,6 +64,14 @@ RetCode ConvTransposeOp::Finalize(const OptKernelOptions& options) {
     }
 
     return RC_SUCCESS;
+}
+
+void ConvTransposeOp::CopyParam(void*& param) {
+    if (param == nullptr) {
+        param = new CudaConvTransposeParam();
+    }
+    *(CudaConvTransposeParam*)param = param_;
+    return;
 }
 
 KernelImpl* ConvTransposeOp::CreateKernelImpl() const {

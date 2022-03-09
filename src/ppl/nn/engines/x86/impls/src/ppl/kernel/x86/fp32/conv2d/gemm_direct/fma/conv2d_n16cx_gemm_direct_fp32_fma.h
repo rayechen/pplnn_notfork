@@ -20,7 +20,6 @@
 
 #include "ppl/kernel/x86/fp32/conv2d.h"
 #include "ppl/kernel/x86/common/internal_include.h"
-#include "ppl/kernel/x86/common/timer.h"
 
 namespace ppl { namespace kernel { namespace x86 {
 
@@ -39,35 +38,27 @@ public:
 private:
     struct kernel_schedule_param {
         // Preprocessed param
-        int32_t ic_per_gp;
-        int32_t oc_per_gp;
-        int32_t padded_ic;
-        int32_t padded_oc;
+        int64_t ic_per_grp;
+        int64_t oc_per_grp;
+        int64_t padded_ic;
+        int64_t padded_oc;
 
         // Kernel tunning
-        int32_t hw_kr_blk;
-        int32_t hw_l3_blk;
-        int32_t hw_l3_buf;
-        int32_t ic_l2_blk;
-        int32_t ic_l2_cnt;
-        int32_t ic_l3_blk;
-        int32_t oc_kr_blk;
-        int32_t oc_l2_blk;
-        int32_t mb_l3_blk;
-        int32_t gp_l3_blk;
+        int64_t s_kr_blk;
+        int64_t s_l2_blk;
+        int64_t ic_l2_blk;
+        int64_t ic_l2_cnt;
+        int64_t oc_l2_blk;
+        int64_t mb_l3_blk;
+        int64_t grp_l3_blk;
         int32_t use_nt_store;
-
-        // Kernel threading
-        int32_t hw_l2_blk;
-        int32_t cur_batch;
-        int32_t cur_group;
+        int32_t down_sample;
     } schedule_param_;
 
     void init_preproc_param();
     void cal_kernel_tunning_param();
-    void cal_kernel_threading_param(const int32_t batch, const int32_t group);
 
-    static int32_t cal_ic_l2_blk(const conv2d_fp32_param &param);
+    static int64_t cal_ic_l2_blk(const conv2d_fp32_param &param);
 
     friend conv2d_n16cx_gemm_direct_fp32_fma_manager;
 };

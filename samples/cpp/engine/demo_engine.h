@@ -29,8 +29,8 @@ public:
     ppl::common::RetCode Configure(uint32_t, ...) override {
         return ppl::common::RC_UNSUPPORTED;
     }
-    EngineContext* CreateEngineContext(const std::string& graph_name) override;
-    bool CanRunOp(const ir::Node*) const override {
+    EngineContext* CreateEngineContext() override;
+    bool Supports(const ir::Node*) const override {
         return true;
     }
     ppl::common::RetCode ProcessGraph(utils::SharedResource*, ir::Graph*, RuntimePartitionInfo*) override;

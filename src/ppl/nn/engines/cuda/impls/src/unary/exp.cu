@@ -69,10 +69,10 @@ __global__ void ppl_cukernel_exp_nhwc(const uint64_t num_elems,
 
 ppl::common::RetCode PPLCUDAExpForwardImp(
     cudaStream_t stream,
-    const ppl::nn::TensorShape* input_shape,
-    const void* input,
-    const ppl::nn::TensorShape* output_shape,
-    void* output)
+    const ppl::nn::TensorShape *input_shape,
+    const void *input,
+    const ppl::nn::TensorShape *output_shape,
+    void *output)
 {
     uint64_t num_elems = output_shape->GetElementsIncludingPadding();
     int batch          = output_shape->GetDim(0);
@@ -96,7 +96,7 @@ ppl::common::RetCode PPLCUDAExpForwardImp(
         } else {
             return ppl::common::RC_UNSUPPORTED;
         }
-    } else if (output_shape->GetDataFormat() == ppl::common::DATAFORMAT_NHWC) {
+    } else if (output_shape->GetDataFormat() == ppl::common::DATAFORMAT_NHWC8) {
         int block_size = 256;
         dim3 grid_size;
         int chw     = channels * height * width;

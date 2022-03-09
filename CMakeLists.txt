@@ -8,8 +8,10 @@ project(ppl.nn)
 option(PPLNN_BUILD_TESTS "build all tests" ON)
 option(PPLNN_BUILD_TOOLS "build tools" ON)
 option(PPLNN_BUILD_SAMPLES "build samples" ON)
+option(PPLNN_INSTALL "install ppl headers and libs" ON)
 option(PPLNN_ENABLE_KERNEL_PROFILING "enable profiling for each kernel" OFF)
-option(PPLNN_ENABLE_PYTHON_API "enable python api support" ON)
+option(PPLNN_ENABLE_PYTHON_API "enable python api support" OFF)
+option(PPLNN_ENABLE_LUA_API "enable lua api support" OFF)
 
 # --------------------------------------------------------------------------- #
 
@@ -29,7 +31,7 @@ include(cmake/deps.cmake)
 include(cmake/protobuf.cmake)
 
 hpcc_populate_dep(rapidjson)
-hpcc_populate_dep(ppl.common)
+hpcc_populate_dep(pplcommon)
 
 # --------------------------------------------------------------------------- #
 
@@ -66,10 +68,6 @@ if(PPLNN_ENABLE_KERNEL_PROFILING)
     list(APPEND PPLNN_COMPILE_DEFINITIONS PPLNN_ENABLE_KERNEL_PROFILING)
 endif()
 
-if(PPLNN_ENABLE_PYTHON_API)
-    add_subdirectory(python)
-endif()
-
 # --------------------------------------------------------------------------- #
 
 # engines
@@ -84,13 +82,20 @@ endif()
 
 # --------------------------------------------------------------------------- #
 
-# dependencies
+if(PPLNN_ENABLE_PYTHON_API)
+    add_subdirectory(python)
+endif()
+
+if(PPLNN_ENABLE_LUA_API)
+    add_subdirectory(lua)
+endif()
 
 add_library(pplnn_static STATIC ${PPLNN_SOURCES})
 target_include_directories(pplnn_static PUBLIC ${PPLNN_INCLUDE_DIRECTORIES})
 target_link_directories(pplnn_static PUBLIC ${PPLNN_LINK_DIRECTORIES})
 target_link_libraries(pplnn_static PUBLIC ${PPLNN_LINK_LIBRARIES})
 target_compile_definitions(pplnn_static PUBLIC ${PPLNN_COMPILE_DEFINITIONS})
+target_compile_features(pplnn_static PRIVATE cxx_std_11)
 
 target_include_directories(pplnn_static PRIVATE
     ${rapidjson_SOURCE_DIR}/include
@@ -100,7 +105,17 @@ target_include_directories(pplnn_static PRIVATE
 
 # installation
 
-include(cmake/install.cmake)
+if(PPLNN_INSTALL)
+    install(DIRECTORY include DESTINATION .)
+    install(TARGETS pplnn_static DESTINATION lib)
+
+    set(PPLNN_CMAKE_CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/generated/pplnn-config.cmake)
+    configure_file(${CMAKE_CURRENT_LIST_DIR}/cmake/pplnn-config.cmake.in
+        ${PPLNN_CMAKE_CONFIG_FILE}
+        @ONLY)
+    install(FILES ${PPLNN_CMAKE_CONFIG_FILE} DESTINATION lib/cmake/ppl)
+    unset(PPLNN_CMAKE_CONFIG_FILE)
+endif()
 
 # --------------------------------------------------------------------------- #
 

@@ -1,4 +1,4 @@
-if(NOT PPLNN_USE_X86_64)
+if(NOT HPCC_USE_X86_64)
     return()
 endif()
 
@@ -10,4 +10,5 @@ endif()
 
 add_executable(classification classification.cpp)
 target_include_directories(classification PUBLIC ${OpenCV_INCLUDE_DIRS})
+target_compile_features(classification PRIVATE cxx_std_11)
 target_link_libraries(classification PUBLIC pplnn_static ${OpenCV_LIBS})

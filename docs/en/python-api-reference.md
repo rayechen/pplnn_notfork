@@ -8,7 +8,7 @@ This section describes the python APIs of `PPLNN`. Refer to [pplnn.py](../../too
 dims = TensorShape::GetDims()
 ```
 
-Returns a tuple of array dimensions.
+Returns an array of dimensions.
 
 ```python
 TensorShape::SetDims(dims)
@@ -72,26 +72,18 @@ Tensor::SetBfferPtr(addr)
 
 Sets the tensor buffer area to `addr` which is an integer and can be casted to `void*`. Note that `addr` can be read/written by internal `Device` class.
 
-### Engine
-
-```python
-name_str = Engine::GetName()
-```
-
-Returns engine's name.
-
 ### OnnxRuntimeBuilderFactory
 
 ```python
 runtime_builder = OnnxRuntimeBuilderFactory::CreateFromFile(onnx_model_file, engines)
 ```
 
-Creates an `OnnxRuntimeBuilder` instance from an ONNX model. `engines` is a list of `Engine` instances that may be used to evaluate the model.
+Creates an `RuntimeBuilder` instance from an ONNX model. `engines` is a list of `Engine` instances that may be used to evaluate the model.
 
-### OnnxRuntimeBuilder
+### RuntimeBuilder
 
 ```python
-runtime = OnnxRuntimeBuilder::CreateRuntime()
+runtime = RuntimeBuilder::CreateRuntime()
 ```
 
 Creates a `Runtime` instance for inferencing.
