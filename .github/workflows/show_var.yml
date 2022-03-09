@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: show vars
         run: |
+          echo "github.ref: ${{ github.ref }}"
+          echo "github.head_ref: ${{ github.head_ref }}"
           echo "github.event.pull_request.number: ${{ github.event.pull_request.number }}"
           echo "env.PR_NUMBER: ${{ env.PR_NUMBER }}"
           echo ${{ toJson(github) }}
