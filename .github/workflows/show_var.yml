@@ -11,8 +11,8 @@ on:
     #  - created
   workflow_dispatch:
 
-env:
-  PR_NUMBER: ${{ github.event.pull_request.number }}
+#env:
+#  PR_NUMBER: ${{ github.event.pull_request.number }}
   
 concurrency: 
   # pr时： branch_x--pull_request--refs/pull/5/merge
@@ -31,7 +31,7 @@ jobs:
           echo "github.ref: ${{ github.ref }}"
           echo "github.head_ref: ${{ github.head_ref }}"
           echo "github.event.pull_request.number: ${{ github.event.pull_request.number }}"
-          echo "env.PR_NUMBER: ${{ env.PR_NUMBER }}"
+          #echo "env.PR_NUMBER: ${{ env.PR_NUMBER }}"
           echo ${{ toJson(github) }}
           echo "sleep begin."
           sleep 10m
