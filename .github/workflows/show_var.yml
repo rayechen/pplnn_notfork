@@ -15,9 +15,9 @@ on:
 #  PR_NUMBER: ${{ github.event.pull_request.number }}
   
 concurrency: 
-  # pr时： Show Vars--branch_x--pull_request--refs/pull/5/merge
-  # 手动时: Show Vars-- --workflow_dispatch--refs/heads/master
-  group: ${{ github.workflow }}--${{ github.head_ref }}--${{ github.event_name }}--${{ github.ref }}
+  # pr时： Show Vars--refs/pull/5/merge--pull_request
+  # 手动时: Show Vars--refs/heads/master--workflow_dispatch
+  group: ${{ github.workflow }}--${{ github.ref }}--${{ github.event_name }}
   cancel-in-progress: true
   
 jobs:
@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: show vars
         run: |
-          echo "github.workflow--github.head_ref--github.event_name--github.ref: ${{ github.workflow }}--${{ github.head_ref }}--${{ github.event_name }}--${{ github.ref }}"
+          echo "github.workflow--github.ref--github.event_name: ${{ github.workflow }}--${{ github.ref }}--${{ github.event_name }}"
           echo "github.ref: ${{ github.ref }}"
           echo "github.head_ref: ${{ github.head_ref }}"
           echo "github.event.pull_request.number: ${{ github.event.pull_request.number }}"
