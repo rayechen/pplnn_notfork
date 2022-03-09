@@ -8,6 +8,12 @@ on:
     branches: [ master ]
     paths-ignore: ['.**', 'docker/**', 'docs/**', 'samples/**', README.md]
   workflow_dispatch:
+  
+concurrency: 
+  # pr时： Show Vars--branch_x--refs/pull/5/merge--pull_request
+  # 手动时: Show Vars--1955407918--refs/heads/master--workflow_dispatch
+  group: ${{ github.workflow }}--${{ github.head_ref || github.run_id }}--${{ github.ref }}--${{ github.event_name }}
+  cancel-in-progress: true
 
 jobs:
   build_and_test:
@@ -16,6 +22,7 @@ jobs:
     steps:
       - name: Sleep
         run: |
+          echo "github.workflow--github.head_ref or github.run_id--github.ref--github.event_name: ${{ github.workflow }}--${{ github.head_ref || github.run_id }}--${{ github.ref }}--${{ github.event_name }}"
           echo "sleep begin."
           sleep 5m
           echo "sleep end."
