@@ -41,14 +41,14 @@ jobs:
         
       - name: show vars
         run: |
-          echo "jobs.<job_id>"
-          echo "jobs.<job_id>.name"
+          echo "${{ jobs.<job_id> }}"
+          echo "${{ jobs.<job_id>.name }}"
           echo "github.workflow--github.head_ref or github.run_id--github.ref--github.event_name: ${{ github.workflow }}--${{ github.head_ref || github.run_id }}--${{ github.ref }}--${{ github.event_name }}"
           echo "github.ref: ${{ github.ref }}"
           echo "github.head_ref: ${{ github.head_ref }}"
           echo "github.event.pull_request.number: ${{ github.event.pull_request.number }}"
           echo "github.run_id: ${{ github.run_id }}"
-          echo "github.job_id: ${{ github.job_id }}"
+          #echo "github.job_id: ${{ github.job_id }}"
           #echo "env.PR_NUMBER: ${{ env.PR_NUMBER }}"
           echo ${{ toJson(github) }}
           #echo "sleep begin."
