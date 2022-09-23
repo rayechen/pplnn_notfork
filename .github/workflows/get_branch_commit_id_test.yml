@@ -20,8 +20,9 @@ jobs:
         run: | 
           echo "current dir: $(pwd)"
           echo "GITHUB_BRANCH: $GITHUB_BRANCH"
-          echo "git_branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_BRANCH
+          echo "git_branch=${GITHUB_REF#refs/heads/}" #>> $GITHUB_BRANCH
           echo "GITHUB_BRANCH: $GITHUB_BRANCH"
+          echo "git_branch: $git_branch"
 
       - name: Check Branch
         run: echo "${{ env.branch }}"
@@ -30,8 +31,9 @@ jobs:
         id: hash
         run: |
           echo "GITHUB_HASH: $GITHUB_HASH"
-          echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_HASH
+          echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" #>> $GITHUB_HASH
           echo "GITHUB_HASH: $GITHUB_HASH"
+          echo "git_hash: $git_hash"
 
       - name: Check Hash
         run: echo "${{ env.hash }}"
