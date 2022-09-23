@@ -1,0 +1,78 @@
+name: Get Branch And Commit id Test
+
+on:
+  #push:
+  #  branches: [ master ]
+  #  paths-ignore: ['.**', 'docker/**', 'docs/**', 'samples/**', README.md]
+  pull_request:
+    branches: [ master ]
+    paths-ignore: ['.**', 'docker/**', 'docs/**', 'samples/**', README.md]
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get Branch
+        id: branch
+        run: | 
+          echo "current dir: $(pwd)"
+          echo "GITHUB_BRANCH: $GITHUB_BRANCH"
+          echo "git_branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_BRANCH
+          echo "GITHUB_BRANCH: $GITHUB_BRANCH"
+
+      - name: Check Branch
+        run: echo "${{ env.branch }}"
+
+      - name: Get Hash
+        id: hash
+        run: |
+          echo "GITHUB_HASH: $GITHUB_HASH"
+          echo "git_hash=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_HASH
+          echo "GITHUB_HASH: $GITHUB_HASH"
+
+      - name: Check Hash
+        run: echo "${{ env.hash }}"
+        
+      - name: show vars
+        run: |
+          echo "github.workflow--github.head_ref or github.run_id--github.ref--github.event_name: ${{ github.workflow }}--${{ github.head_ref || github.run_id }}--${{ github.ref }}--${{ github.event_name }}"
+          echo "github.ref: ${{ github.ref }}"
+          echo "github.head_ref: ${{ github.head_ref }}"
+          echo "github.event.pull_request.number: ${{ github.event.pull_request.number }}"
+          echo "github.run_id: ${{ github.run_id }}"
+          echo "github.job_id: ${{ github.job_id }}"
+          #echo "env.PR_NUMBER: ${{ env.PR_NUMBER }}"
+          echo ${{ toJson(github) }}
+          #echo "sleep begin."
+          #sleep 10m
+          #echo "sleep end.
+          echo "github.event_name: ${{ github.event_name }}"
+          echo "github.event.workflow_dispatch.user.login: ${{ github.event.workflow_dispatch.user.login }}"
+          echo "github.event.pull_request.user.login: ${{ github.event.pull_request.user.login }}"
+          echo "github.event.pull_request.author.email: ${{ github.event.pull_request.author.email }}"
+          echo "github.event.pull_request.user.login: ${{ github.event.pull_request.user.login }}"
+          echo "----------------------------------"
+
+      #- name: Create docker image
+      #  run: ./docker-build.sh ${{ env.branch }} ${{ env.hash }}
+      #- name: Create Checkout Directory
+      #  run: |
+      #    echo "Create Checkout Directory: ${{ github.run_id }}."
+      #    [ -z "${{ github.run_id }}" ] || rm -rf ${{ github.run_id }}
+      #    mkdir ${{ github.run_id }}
+      #- name: Checkout
+      #  uses: actions/checkout@v2
+      #  with:
+      #    path: ${{ github.run_id }}
+
+      #- name: Build
+      #  run: |
+      #    cd ../../ && ./build_pplnn.sh ${{ github.run_id }} x86_64
+      
+      # ### 临时屏蔽，可随时打开 ###
+      #- name: Test
+      #  run: |
+      #    cd ../../ && ./test_pplnn.sh ${{ github.run_id }} x86_64
